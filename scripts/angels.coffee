@@ -41,7 +41,11 @@ module.exports = (robot) ->
 	# Listen to any command
 	robot.respond /(.*)/i, (res) ->
 		query = res.match[1]
-		if stage is 0
+		if query is 'help'
+			res.send "For information about your tour tap: http://tts.imtranslator.net/ZM4Y"
+			delay 1000, ->
+				res.send "If you need help right now, call tel:0800007102"
+		else if stage is 0
 			res.send "Hi! I'm your mobile angel - I'll help you with your journey today! To start, I need you to tell me which station you are at right now."
 			stage = 1
 		else if stage is 1
@@ -70,15 +74,21 @@ module.exports = (robot) ->
 				c_depart = moment(depart_cxn.departure).fromNow()
 				c_platform = depart_cxn.platform
 				res.send "OK, your next connection to #{c_to} is #{c_depart} on platform #{c_platform}."
-				delay 3000, ->
+				delay 5000, ->
 					res.send "Please let me know when you have boarded the train."
 					stage = 3
 		else if stage is 3
 			c_arrive = moment(target_cxn.arrival).fromNow()
-			res.send "Great! Your train will arrive in #{c_arrive}. I will be in touch 10 minutes before you arrive. Enjoy the trip :)"
+			res.send "Great! Your train will arrive in #{c_arrive}. I will be in touch 5 minutes before you arrive. Safe travels!"
 			stage = 4
+			# Triggered 5 minutes before arrival
 			delay 10000, ->
+				stage = 0
 				res.send "You are about to arrive! Don't forget all your bags."
+				# Triggered 2 minutes after arrival
+				delay 10000, ->
+					c_to = target_cxn.station.name
+					res.send "You should now be in #{c_to} - if you need help, say 'please'."
 
 	# stage 3: final destination
 	# robot.respond /arrival/i, (res) ->
